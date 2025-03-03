@@ -1,5 +1,5 @@
 # CMake entry point
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.10)
 project (CG_Project)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -53,6 +53,8 @@ add_definitions(
 
 add_executable(p1
 	source/main.cpp
+	source/sceneGraph.cpp
+	source/sceneGraph.hpp
 	source/meshObject.cpp
 	source/meshObject.hpp
 	source/gridObject.cpp

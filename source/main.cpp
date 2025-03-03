@@ -6,6 +6,7 @@
 #include <iostream>
 #include "meshObject.hpp"
 #include "gridObject.hpp"
+#include "sceneGraph.hpp"
 #include <vector>
 
 
@@ -17,15 +18,9 @@ int getPickedId();
 
 
 // Global variables
-glm::vec4 robotColor = glm::vec4(0.6757f, 0.3125f, 0.77734f, 1.0f);
+glm::vec4 robotColor = glm::vec4(0.6757f, 0.8125f, 0.0f, 1.0f);
 glm::vec4 robotColorBright = glm::vec4(0.8757f, 0.4125f, 0.87734f, 1.0f);
 
-
-void drawMeshObject(void* obj, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& color, const glm::mat4& parentTransform) {
-    // Cast the generic pointer to meshObject* and call its draw method.
-    meshObject* mesh = static_cast<meshObject*>(obj);
-    mesh->draw(view, projection, color, parentTransform);
-}
 
 const GLuint windowWidth = 1024, windowHeight = 768;
 GLFWwindow* window;
@@ -37,41 +32,7 @@ float cameraAngleX = glm::radians(0.0f);  // X angle (up/down)
 float cameraAngleY = glm::radians(0.0f);  // Y angle (left/right)
 float radius = 10.0f;  
 
-// Create hierarichal structure for the Robot
-struct Node {
-    // Data
-    glm::mat4 m; // starting matrix 
-    void* obj; // Pointer to an object, any type (e.g. meshObject, gridObject)
-    void (*draw)(void* obj, const glm::mat4& view, const glm::mat4& proj, const glm::vec4& color, const glm::mat4& parentTransform); // Function pointer to draw the object
-    Node* child;
-    Node* sibling;
-    glm::vec4 color;
 
-    // Constructor
-    Node(void* obj, 
-         void (*draw)(void* obj, const glm::mat4&, const glm::mat4&, const glm::vec4&, const glm::mat4&),
-         const glm::vec4& color = glm::vec4(1.0f))
-    // initial values
-    : m(glm::mat4(1.0f)), obj(obj), draw(draw), sibling(nullptr), child(nullptr) {}
-
-    // Methods
-    void changeColor(const glm::vec4& color) {
-        this->color = color;
-    }
-    void translate(const glm::vec3& translation) {
-        m = glm::translate(m, translation);
-    }
-    void rotate(float angle, const glm::vec3& axis) {
-        m = glm::rotate(m, glm::radians(angle), axis);
-    }
-
-    void traverseDraw(const glm::mat4& view, const glm::mat4& proj, const glm::mat4& parentTransform = glm::mat4(1.0f)) {
-        glm::mat4 globalTransform = parentTransform * m;
-        draw(obj, view, proj, color, globalTransform);
-        if (child) child->traverseDraw(view, proj, globalTransform);
-        if (sibling) sibling->traverseDraw(view, proj, parentTransform);
-    }
-};
 
 // draws a node, and all of its children and siblings recursively
 
@@ -114,10 +75,10 @@ int main() {
 
 
     // Define the Nodes with the object, and the draw function
-    Node* Robot = new Node(&baseMesh, drawMeshObject, robotColor);
-    Node* Arm1 = new Node(&Arm1Mesh, drawMeshObject, robotColor);
-    Node* Arm2 = new Node(&Arm2Mesh, drawMeshObject, robotColor);
-    Node* Joint = new Node(&JointMesh, drawMeshObject, robotColor);
+    meshNode* Robot = new meshNode(&baseMesh, robotColor);
+    meshNode* Arm1 = new meshNode(&Arm1Mesh, robotColor);
+    meshNode* Arm2 = new meshNode(&Arm2Mesh, robotColor);
+    meshNode* Joint = new meshNode(&JointMesh, robotColor);
 
     // Set the hierarchy
     Robot->child = Arm1;
@@ -281,6 +242,7 @@ int main() {
         //TODO: P1aTask3 - Draw all robot arm pieces.
         // ----- Graphics Pipeline Step 3, 4: apply view matrix and then projection matrix to world coords ---------------------
         grid.draw(viewMatrix, projectionMatrix);
+        //baseMesh.draw(viewMatrix, projectionMatrix, robotColor);
         
         // Draw robot based on the hierarchy
         Robot->traverseDraw(viewMatrix, projectionMatrix);
