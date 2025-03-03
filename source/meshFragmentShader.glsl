@@ -5,11 +5,11 @@
 // Output color
 out vec4 color;
 
-uniform vec4 userColor;
+uniform vec4 objColor;
 
 void main() {
     // Set the fragment color
     //TODO: P1bTask4 - Find a way to draw the selected part in a brighter color.
-    color = userColor;
+    color = objColor;
 }
 

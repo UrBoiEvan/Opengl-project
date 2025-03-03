@@ -71,17 +71,17 @@ meshObject::meshObject(const std::string& objFilePath) : id(nextId++) { // Assig
 
     // Vertex attributes
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(0); // positions
 
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)(3 * sizeof(GLfloat)));
+    //glEnableVertexAttribArray(1); //normals
 
     glBindVertexArray(0);
 
     // Load and compile shaders
     shaderProgram = LoadShaders("meshVertexShader.glsl", "meshFragmentShader.glsl");
     pickingShaderProgram = LoadShaders("pickingVertexShader.glsl", "pickingFragmentShader.glsl");
-    objectColorLocation = glGetUniformLocation(shaderProgram, "userColor"); // Get location of uniform
+    objColorLocation = glGetUniformLocation(shaderProgram, "objColor"); // Get location of uniform
 }
 
 
@@ -99,7 +99,7 @@ meshObject::~meshObject() {
 void meshObject::changeColor(const glm::vec4& color) {
     // Set the color of the uniform specified in the fragment shader
     glUseProgram(shaderProgram);
-    glUniform4fv(objectColorLocation, 1, glm::value_ptr(color)); // Set the uniform
+    glUniform4fv(objColorLocation, 1, glm::value_ptr(color)); // Set the uniform
 }
 //TODO: P1bTask5 - Modify to accept lighiting info as arguement.
 void meshObject::draw(const glm::mat4& view, const glm::mat4& projection, const glm::vec4& color, const glm::mat4& parentTransform) {
@@ -110,12 +110,13 @@ void meshObject::draw(const glm::mat4& view, const glm::mat4& projection, const 
     glm::mat4 MVP = projection * view * final_model;
     GLuint matrixID = glGetUniformLocation(shaderProgram, "MVP");
     glUniformMatrix4fv(matrixID, 1, GL_FALSE, glm::value_ptr(MVP));
+
     
 
  
     
     //TODO: P1bTask5 - Send lighting info to shader using uniform. May also need to send the model matrix seperatily as a uniform.
-    glUniform4fv(objectColorLocation, 1, glm::value_ptr(color)); // Set the uniform
+    glUniform4fv(objColorLocation, 1, glm::value_ptr(color)); // Set the uniform
 
     // Draw the object
     glBindVertexArray(VAO);

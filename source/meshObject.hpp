@@ -37,8 +37,9 @@ private:
     GLuint VAO, VBO, EBO;
     GLuint shaderProgram; // used under normal cricumstances
     GLuint pickingShaderProgram; // used when the object is "picked", different shaders for different purposes
-    GLint objectColorLocation; // Get location of uniform
+    GLint objColorLocation; // Get location of uniform
     glm::mat4 modelMatrix; // [ M = T • R • S ] Model matrix for the object
+    glm::vec4 color;
 
     static int nextId; // Static counter for unique IDs
     int id;            // ID for this specific object
