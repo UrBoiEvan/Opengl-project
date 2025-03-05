@@ -1,6 +1,7 @@
 #ifndef meshObject_hpp
 #define meshObject_hpp
 
+#include "common_types.hpp"
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
@@ -10,12 +11,13 @@
 #include <string>
 
 
+
 class meshObject {
 public:
-    meshObject(const std::string& objFilePath);
+    meshObject(const std::string& objFilePath, const Lights& lightsPointer, const glm::vec3& diffusem, const glm::vec3& specularm, const float& shininess);
     ~meshObject();
 
-    void draw(const glm::mat4& view, const glm::mat4& projection, const glm::vec4& color, const glm::mat4& parentTransform = glm::mat4(1.0f));
+    void draw(const glm::vec3& cameraPosition, const glm::mat4& view, const glm::mat4& projection, const glm::vec4& color, const glm::mat4& parentTransform = glm::mat4(1.0f));
     void drawPicking(const glm::mat4& view, const glm::mat4& projection);
     void translate(const glm::vec3& translation); // Translate the object
     void rotate(float angle, const glm::vec3& axis); // Rotate the object
@@ -38,8 +40,35 @@ private:
     GLuint shaderProgram; // used under normal cricumstances
     GLuint pickingShaderProgram; // used when the object is "picked", different shaders for different purposes
     GLint objColorLocation; // Get location of uniform
+    GLint attenuationCoefficientLocation;
+    GLint diffuselLocation;
+    GLint diffusemLocation;
+    GLint finalMatrixLocation;
+    GLint viewPositionLocation;
+    GLint specularm1Location;
+    GLint shininess1Location;
+
+    // Light 1 uniforms
+    GLint position1Location;
+    GLint intensityl1Location;
+    GLint diffusel1Location;
+    GLint specularl1Location;
+
+    // Light 2 uniforms
+    GLint position2Location;
+    GLint intensityl2Location;
+    GLint diffusel2Location;
+    GLint specularl2Location;
+
+
+
     glm::mat4 modelMatrix; // [ M = T • R • S ] Model matrix for the object
     glm::vec4 color;
+    glm::vec3 diffusem;
+    glm::vec3 specularm;
+    float shininess;
+
+    const Lights& lightsManager;
 
     static int nextId; // Static counter for unique IDs
     int id;            // ID for this specific object
