@@ -53,12 +53,13 @@ add_definitions(
 
 add_executable(p1
 	source/main.cpp
-	source/sceneGraph.cpp
-	source/sceneGraph.hpp
 	source/meshObject.cpp
 	source/meshObject.hpp
 	source/gridObject.cpp
 	source/gridObject.hpp
+	source/sceneGraph.cpp
+	source/sceneGraph.hpp
+	source/common_types.hpp
 	common/shader.cpp
 	common/shader.hpp
 	common/controls.cpp

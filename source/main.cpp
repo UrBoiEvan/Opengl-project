@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include "common_types.hpp"
 #include "meshObject.hpp"
 #include "gridObject.hpp"
 #include "sceneGraph.hpp"
@@ -18,7 +19,7 @@ int getPickedId();
 
 
 // Global variables
-glm::vec4 robotColor = glm::vec4(0.6757f, 0.8125f, 0.0f, 1.0f);
+glm::vec4 robotColor = glm::vec4(0.6757f, 0.8125f, 0.8f, 1.0f);
 glm::vec4 robotColorBright = glm::vec4(0.8757f, 0.4125f, 0.87734f, 1.0f);
 
 
@@ -58,10 +59,30 @@ int main() {
 
     // ----- Graphics Pipeline Step 1  Object coordinates ---------------------
     // Mesh Objects | stores local coordinates and model matrix   [OBJ Coords] • [Model Matrix] = [World Coords]
-    meshObject baseMesh = meshObject("MeshObjects/Base.obj"); // In meshobject constructor, 
-    meshObject Arm1Mesh = meshObject("MeshObjects/Arm1.obj"); // model matrix is initialized to identity matrix
-    meshObject Arm2Mesh = meshObject("MeshObjects/Arm2.obj");
-    meshObject JointMesh = meshObject("MeshObjects/Joint.obj");
+    glm::vec3 diffusem = glm::vec3(0.5,0.5,0.5);//glm::vec3(robotColor); // Diffuse material
+    float attenuationCoefficient = 0.1;
+    glm::vec3 ambient = glm::vec3(0.5,0.5,0.5);
+    glm::vec3 specularm = glm::vec3(0.5,0.5,0.5);
+    float shininess = 64.0f;
+
+    // Lights structure to store every light
+    // Set lights in the scene before creating the mesh objects
+    Lights lightsManager = Lights(ambient, attenuationCoefficient);
+
+    //                            Intensity, Diffuse, Specular
+    lightNode light1 = lightNode(glm::vec3(0,0,0), glm::vec3(0.0,0.7,0.6), glm::vec3(0.5,0.5,0.5));
+    light1.translate(glm::vec3(5,5,0));
+
+    lightNode light2 = lightNode(glm::vec3(0,0,0), glm::vec3(0.6,0.7,0.0), glm::vec3(0.5,0.5,0.5));
+    light2.translate(glm::vec3(-5,5,0));
+
+    lightsManager.addLight(&light1);
+    lightsManager.addLight(&light2);
+
+    meshObject baseMesh = meshObject("MeshObjects/Base.obj", lightsManager, diffusem, specularm, shininess); // In meshobject constructor, 
+    meshObject Arm1Mesh = meshObject("MeshObjects/Arm1.obj", lightsManager, diffusem, specularm, shininess); // model matrix is initialized to identity matrix
+    meshObject Arm2Mesh = meshObject("MeshObjects/Arm2.obj", lightsManager, diffusem, specularm, shininess);
+    meshObject JointMesh = meshObject("MeshObjects/Joint.obj", lightsManager, diffusem, specularm, shininess);
 
     // ----- Graphics Pipeline Step 2, defining World coordinates ---------------------
     // Translate the mesh object to world space by modifying the EXISTING model matrix [OBJ Coords] • [New Model Matrix] = [World Coords]
@@ -74,11 +95,16 @@ int main() {
     Arm2Mesh.rotate(-47, glm::vec3(0,0,1));
 
 
+
     // Define the Nodes with the object, and the draw function
     meshNode* Robot = new meshNode(&baseMesh, robotColor);
     meshNode* Arm1 = new meshNode(&Arm1Mesh, robotColor);
     meshNode* Arm2 = new meshNode(&Arm2Mesh, robotColor);
     meshNode* Joint = new meshNode(&JointMesh, robotColor);
+
+
+
+    //lightNode* Light1 = new lightNode(glm::vec3(1.0,1.0,1.0), glm::vec3)
 
     // Set the hierarchy
     Robot->child = Arm1;
@@ -245,7 +271,7 @@ int main() {
         //baseMesh.draw(viewMatrix, projectionMatrix, robotColor);
         
         // Draw robot based on the hierarchy
-        Robot->traverseDraw(viewMatrix, projectionMatrix);
+        Robot->traverseDraw(cameraPosition, viewMatrix, projectionMatrix);
         
         //TODO: P1bTask4 - Draw the robot arm pieces using the hierachy instead. Call the draw function on the root node. The remeaining pieces will be drawn using recursive calls.
 
